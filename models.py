@@ -3,10 +3,12 @@ import torch
 import torch.optim as optim
 from torch.autograd import Variable
 import tensorflow as tf
+import time
+
 
 class ConvNet(nn.Module):
 
-    def __init__(self, num_classes=10):
+    def __init__(self, x, y, num_classes=10):
         super(ConvNet, self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
@@ -23,7 +25,8 @@ class ConvNet(nn.Module):
         )
         print("Layer 2 completed!")
         self.fc = nn.Linear(7 * 7 * 32, num_classes)
-
+        self.x = x
+        self.y = y
 
     def forward(self, x):
         out = self.layer1(x)
@@ -32,16 +35,20 @@ class ConvNet(nn.Module):
         out = self.fc(out)
         return out
 
-    def trainCNN(self, net, x, y):
-        x = tf.Tensor(x)
-        y = tf.Tensor(y)
+    def trainCNN(self, net):
+
+        tensor_x = torch.stack([torch.Tensor(i) for i in self.x])
+        tensor_y = torch.stack([torch.Tensor(i) for i in self.y])
+        my_dataset = torch.utils.data.TensorDataset(tensor_x, tensor_y)  # create your datset
+        train_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
+
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
         for epoch in range(2):  # loop over the dataset multiple times
             running_loss = 0.0
             # With a batch size of 4 in each iteration
-            for i, data in zip(x,y):  # trainloader reads data using torchvision
+            for i, data in enumerate(train_loader, 0):
                 inputs, labels = data
                 inputs, labels = Variable(inputs), Variable(labels)
 
@@ -59,13 +66,18 @@ class ConvNet(nn.Module):
                     running_loss = 0.0
 
         print('Finished Training')
+        PATH = './cifar_net.pth'
+        torch.save(net.state_dict(), PATH)
+        print('Training saved')
 
-    def testCNN(self, net, x, y):
-        x = tf.Tensor(x)
-        y = tf.Tensor(y)
+    def testCNN(self, net):
+        tensor_x = torch.stack([torch.Tensor(i) for i in self.x])
+        tensor_y = torch.stack([torch.Tensor(i) for i in self.y])
+        my_dataset = torch.utils.data.TensorDataset(tensor_x, tensor_y)  # create your datset
         correct = 0
         total = 0
-        for data in zip(x,y):
+        test_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
+        for data in test_loader:
             images, labels = data
             outputs = net(Variable(images))
             _, predicted = torch.max(outputs.data, 1)  # Find the class index with the maximum value.
@@ -74,4 +86,3 @@ class ConvNet(nn.Module):
 
         print('Accuracy of the network on the 10000 test images: %d %%' % (
                 100 * correct / total))
-
