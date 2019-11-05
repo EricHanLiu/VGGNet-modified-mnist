@@ -36,8 +36,8 @@ class CNN(nn.Module):
 
     def train_cnn(self):
 
-        tensor_x = torch.stack([torch.Tensor(i) for i in self.x])
-        tensor_y = torch.stack([torch.Tensor(i) for i in self.y])
+        tensor_x = torch.tensor(self.x)
+        tensor_y = torch.tensor(self.y)
         my_dataset = torch.utils.data.TensorDataset(tensor_x, tensor_y)  # create your datset
         train_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
 
@@ -51,6 +51,7 @@ class CNN(nn.Module):
                 inputs, labels = data
                 inputs, labels = Variable(inputs), Variable(labels)
                 inputs = inputs.unsqueeze(1)
+                inputs = inputs.view(1, -1)
 
                 optimizer.zero_grad()
                 outputs = self(inputs)
