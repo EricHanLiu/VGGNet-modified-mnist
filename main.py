@@ -1,5 +1,5 @@
 from data_processing import DataProcessing
-from models import ConvNet as CNN
+from models import CNN
 import models
 
 
@@ -12,13 +12,11 @@ def main():
     cnn = CNN(dp.train_images, dp.train_y)
     print("Neural net built!")
 
-    cnn.trainCNN(cnn)
-
+    cnn.train_cnn()
 
     print("Training done.")
-    cnn.testCNN(cnn)
+    cnn.test_cnn()
     print("Testing done")
-
 
 
 main()

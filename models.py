@@ -2,14 +2,13 @@ import torch.nn as nn
 import torch
 import torch.optim as optim
 from torch.autograd import Variable
-import tensorflow as tf
-import time
+
+PATH = './cifar_net.pth'
 
 
-class ConvNet(nn.Module):
-
+class CNN(nn.Module):
     def __init__(self, x, y, num_classes=10):
-        super(ConvNet, self).__init__()
+        super(CNN, self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
@@ -35,7 +34,7 @@ class ConvNet(nn.Module):
         out = self.fc(out)
         return out
 
-    def trainCNN(self, net):
+    def train_cnn(self):
 
         tensor_x = torch.stack([torch.Tensor(i) for i in self.x])
         tensor_y = torch.stack([torch.Tensor(i) for i in self.y])
@@ -43,7 +42,7 @@ class ConvNet(nn.Module):
         train_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
 
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+        optimizer = optim.SGD(self.parameters(), lr=0.001, momentum=0.9)
 
         for epoch in range(2):  # loop over the dataset multiple times
             running_loss = 0.0
@@ -53,7 +52,7 @@ class ConvNet(nn.Module):
                 inputs, labels = Variable(inputs), Variable(labels)
 
                 optimizer.zero_grad()
-                outputs = net(inputs)
+                outputs = self(inputs)
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
@@ -66,11 +65,10 @@ class ConvNet(nn.Module):
                     running_loss = 0.0
 
         print('Finished Training')
-        PATH = './cifar_net.pth'
-        torch.save(net.state_dict(), PATH)
+        torch.save(self.state_dict(), PATH)
         print('Training saved')
 
-    def testCNN(self, net):
+    def test_cnn(self):
         tensor_x = torch.stack([torch.Tensor(i) for i in self.x])
         tensor_y = torch.stack([torch.Tensor(i) for i in self.y])
         my_dataset = torch.utils.data.TensorDataset(tensor_x, tensor_y)  # create your datset
@@ -79,7 +77,7 @@ class ConvNet(nn.Module):
         test_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
         for data in test_loader:
             images, labels = data
-            outputs = net(Variable(images))
+            outputs = self(Variable(images))
             _, predicted = torch.max(outputs.data, 1)  # Find the class index with the maximum value.
             total += labels.size(0)
             correct += (predicted == labels).sum()
