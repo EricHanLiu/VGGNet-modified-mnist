@@ -47,9 +47,10 @@ class CNN(nn.Module):
         for epoch in range(2):  # loop over the dataset multiple times
             running_loss = 0.0
             # With a batch size of 4 in each iteration
-            for i, data in enumerate(train_loader, 0):
+            for i, data in enumerate(train_loader):
                 inputs, labels = data
                 inputs, labels = Variable(inputs), Variable(labels)
+                inputs = inputs.unsqueeze(1)
 
                 optimizer.zero_grad()
                 outputs = self(inputs)
