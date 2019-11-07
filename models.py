@@ -38,9 +38,9 @@ class CNN(nn.Module):
 
     def train_cnn(self):
 
-        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 
-        trainset = torch.utils.data.TensorDataset(torch.tensor(self.x), torch.tensor(self.y))
+        trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
 
         classes = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -75,7 +75,9 @@ class CNN(nn.Module):
         print('Training saved')
 
     def test_cnn(self):
-        testset = torch.utils.data.TensorDataset(torch.tensor(self.x), torch.tensor(self.y))
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+
+        testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform)
         testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
         correct = 0
         total = 0
