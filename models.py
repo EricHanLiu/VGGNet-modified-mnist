@@ -1,5 +1,7 @@
 import torch.nn as nn
 import torch
+import torchvision
+import torchvision.transforms as transforms
 import torch.optim as optim
 from torch.autograd import Variable
 
@@ -36,24 +38,27 @@ class CNN(nn.Module):
 
     def train_cnn(self):
 
-        tensor_x = torch.tensor(self.x)
-        tensor_y = torch.tensor(self.y)
-        my_dataset = torch.utils.data.TensorDataset(tensor_x, tensor_y)  # create your datset
-        train_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+        trainset = torch.utils.data.TensorDataset(torch.tensor(self.x), torch.tensor(self.y))
+        trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
+
+        classes = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(self.parameters(), lr=0.001, momentum=0.9)
 
         for epoch in range(2):  # loop over the dataset multiple times
-            running_loss = 0.0
-            # With a batch size of 4 in each iteration
-            for i, data in enumerate(train_loader):
-                inputs, labels = data
-                inputs, labels = Variable(inputs), Variable(labels)
-                inputs = inputs.unsqueeze(1)
-                inputs = inputs.view(1, -1)
 
+            running_loss = 0.0
+            for i, data in enumerate(trainloader, 0):
+                # get the inputs; data is a list of [inputs, labels]
+                inputs, labels = data
+
+                # zero the parameter gradients
                 optimizer.zero_grad()
+
+                # forward + backward + optimize
                 outputs = self(inputs)
                 loss = criterion(outputs, labels)
                 loss.backward()
@@ -62,8 +67,7 @@ class CNN(nn.Module):
                 # print statistics
                 running_loss += loss.item()
                 if i % 2000 == 1999:  # print every 2000 mini-batches
-                    print('[%d, %5d] loss: %.3f' %
-                          (epoch + 1, i + 1, running_loss / 2000))
+                    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000))
                     running_loss = 0.0
 
         print('Finished Training')
@@ -71,18 +75,16 @@ class CNN(nn.Module):
         print('Training saved')
 
     def test_cnn(self):
-        tensor_x = torch.stack([torch.Tensor(i) for i in self.x])
-        tensor_y = torch.stack([torch.Tensor(i) for i in self.y])
-        my_dataset = torch.utils.data.TensorDataset(tensor_x, tensor_y)  # create your datset
+        testset = torch.utils.data.TensorDataset(torch.tensor(self.x), torch.tensor(self.y))
+        testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
         correct = 0
         total = 0
-        test_loader = torch.utils.data.DataLoader(my_dataset, batch_size=4)
-        for data in test_loader:
-            images, labels = data
-            outputs = self(Variable(images))
-            _, predicted = torch.max(outputs.data, 1)  # Find the class index with the maximum value.
-            total += labels.size(0)
-            correct += (predicted == labels).sum()
+        with torch.no_grad():
+            for data in testloader:
+                images, labels = data
+                outputs = self(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
 
-        print('Accuracy of the network on the 10000 test images: %d %%' % (
-                100 * correct / total))
+        print('Accuracy of the network on the 10000 test images: %d %%' % (100 * correct / total))

@@ -1,6 +1,5 @@
 from data_processing import DataProcessing
 from models import CNN
-import models
 
 
 def main():
