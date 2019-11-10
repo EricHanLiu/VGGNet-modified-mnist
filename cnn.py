@@ -9,8 +9,8 @@ from torch.autograd import Variable
 
 from sklearn.model_selection import train_test_split
 
-y = np.array(pd.read_csv('train_max_y.csv'))[:50, 1]
-X = pd.read_pickle('train_max_x')[:50]
+y = np.array(pd.read_csv('train_max_y.csv'))[:5000, 1]
+X = pd.read_pickle('train_max_x')[:5000]
 
 print(X.shape)
 print(y.shape)
@@ -30,10 +30,6 @@ torch_y_test = torch.from_numpy(y_test).type(torch.LongTensor)  # data type is l
 # Pytorch train and test sets
 train = torch.utils.data.TensorDataset(torch_X_train, torch_y_train)
 test = torch.utils.data.TensorDataset(torch_X_test, torch_y_test)
-
-# data loader
-train_loader = torch.utils.data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=False)
-test_loader = torch.utils.data.DataLoader(test, batch_size=BATCH_SIZE, shuffle=False)
 
 # constants
 EPOCHS = 3
@@ -88,7 +84,7 @@ def evaluate(model):
         # print("predicted ", predicted)
         # print("actual ", test_labels)
         correct += (predicted == test_labels).sum()
-    print("Test accuracy:{:.3f}% ".format(float(correct) / (len(test_loader) * BATCH_SIZE)))
+    print("Test accuracy:{:.3f} ".format(float(correct) / (len(test_loader) * BATCH_SIZE)))
 
 
 torch_X_train = torch_X_train.view(-1, 1, 128, 128).float()
@@ -106,6 +102,10 @@ print(torch_y_train.size(0))
 # Pytorch train and test sets
 train = torch.utils.data.TensorDataset(torch_X_train, torch_y_train)
 test = torch.utils.data.TensorDataset(torch_X_test, torch_y_test)
+
+# data loader
+train_loader = torch.utils.data.DataLoader(train, batch_size=BATCH_SIZE, shuffle=False)
+test_loader = torch.utils.data.DataLoader(test, batch_size=BATCH_SIZE, shuffle=False)
 
 
 class CNN(nn.Module):
