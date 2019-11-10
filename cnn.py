@@ -56,15 +56,11 @@ def fit(model, train_loader):
 
 def extract_real_max(output):
     o = output.detach().numpy()
-    print("o", o)
+    print("OUTPUT", o)
     predicted = []
-    threshold = -1.5
     for a in o:
-        complex_max = a.argsort()[-3:][::-1]
-        print(complex_max)
-        ma = max([a if a > threshold else -10 for a in complex_max])
-        print(ma)
-        predicted.append(ma if ma != -10 else max(complex_max))
+        top_three_predictions = a.argsort()[-3:][::-1]
+        predicted.append(max(top_three_predictions))
     predicted = torch.from_numpy(np.array(predicted))
     return predicted
 
