@@ -8,7 +8,7 @@ from torch.autograd import Variable
 from sklearn.model_selection import train_test_split
 
 # constants
-EPOCHS = 3
+EPOCHS = 5
 BATCH_SIZE = 32
 
 # input and target data
@@ -56,7 +56,6 @@ def fit(model, train_loader):
 
 def extract_real_max(output):
     o = output.detach().numpy()
-    print("OUTPUT", o)
     predicted = []
     for a in o:
         top_three_predictions = a.argsort()[-3:][::-1]
