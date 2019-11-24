@@ -1,5 +1,5 @@
-# Miniproject 3
-Repository for COMP551 miniproject 3 (deep learning for image recognition)
+# VGGNet for modified MNIST dataset
+Repository for deep learning image recognition (on a modified MNIST dataset)
 
 ## Final Setup
 > The below setup instructions are outdated, and only run a custom CNN which achieves low (27%) accuracy on the training set for unknown reasons.
@@ -16,4 +16,4 @@ source env/bin/activate
 ```
 pip install -r requirements.txt
 ```
-4. To be determined
+4. Run the driver file
